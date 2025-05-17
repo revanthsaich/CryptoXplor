@@ -59,7 +59,7 @@ export function Navbar() {
           {/* Logo - Left */}
           <Link to="/" className="flex items-center space-x-2">
             <Telescope className="h-10 w-10 text-blue-600" />
-            <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-cyan-500">
+            <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-cyan-500" onClick={(e) => handleNavigation(e, navigation[0])}>
               CryptoXplor
             </span>
           </Link>
