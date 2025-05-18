@@ -1,6 +1,7 @@
 import { forwardRef } from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cn } from "../../lib/utils"
+import React from "react"
 
 const Button = forwardRef(({ 
   className, 

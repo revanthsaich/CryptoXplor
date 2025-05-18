@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react"
-
+import React from "react"
 const ThemeContext = createContext({
   theme: "light",
   setTheme: () => null,

@@ -7,6 +7,7 @@ import {
   BarChart4,
 } from "lucide-react"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card"
+import React from "react"
 
 const features = [
   {

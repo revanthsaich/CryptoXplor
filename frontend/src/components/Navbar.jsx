@@ -11,7 +11,7 @@ import { useState } from "react"
 import { useLocation, useNavigate, Link } from "react-router-dom"
 import { useTheme } from "./theme-provider"
 import { dark } from "@clerk/themes"
-
+import React from "react"
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const location = useLocation()

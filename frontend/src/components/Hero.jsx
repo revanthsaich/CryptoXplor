@@ -1,6 +1,7 @@
 import { Button } from "./ui/button"
 import { ArrowRight, BarChart2, Wallet2, Globe } from "lucide-react"
 import { Link } from "react-router-dom"
+import React from "react"
 
 export function Hero() {
   return (
