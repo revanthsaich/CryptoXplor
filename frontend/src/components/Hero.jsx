@@ -18,7 +18,7 @@ export function Hero() {
             <Button
               asChild
               size="lg"
-              className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 transition"
+              className="gap-2 bg-primary text-primary-foreground hover:bg-muted transition active:translate-y-0.5 active:shadow-inner active:scale-[0.98] transform duration-75"
             >
               <Link to="/dashboard" className="font-bold flex items-center gap-2">
                 Launch App
@@ -29,7 +29,7 @@ export function Hero() {
             <Button
               size="lg"
               asChild
-              className="border-border hover:bg-muted transition"
+              className="border-border hover:bg-muted transition hover:border-black active:translate-y-0.5 active:shadow-inner active:scale-[0.98] transform duration-75"
             >
               <Link to="/docs" className="font-bold">Learn More</Link>
             </Button>

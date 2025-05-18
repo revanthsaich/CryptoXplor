@@ -8,7 +8,7 @@ import { Features } from "./components/Features"
 import { Documentation } from "./pages/Documentation"
 import { Dashboard } from './components/Dashboard'
 import { useEffect } from "react"
-
+import TrendingSection from "./components/TrendingSection"
 const ProtectedRoute = ({ children }) => {
   const { isLoaded, isSignedIn } = useAuth();
   const navigate = useNavigate();
@@ -42,6 +42,7 @@ function App() {
                   <div className="w-full min-h-[calc(100vh-4rem)]">
                     <Hero />
                     <Features />
+                    <TrendingSection />
                   </div>
                 }
               />
