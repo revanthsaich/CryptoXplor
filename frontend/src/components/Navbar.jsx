@@ -99,7 +99,7 @@ export function Navbar() {
               <SignInButton mode="modal">
                 <Button
                   variant="outline"
-                  className="hidden sm:flex hover:bg-primary hover:text-primary-foreground"
+                  className="hidden sm:flex bg-primary-foreground hover:bg-primary hover:text-primary-foreground"
                 >
                   Sign In
                 </Button>

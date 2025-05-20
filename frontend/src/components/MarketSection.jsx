@@ -29,7 +29,7 @@ function MarketSection() {
       <div className="bg-white/2 backdrop-blur-md border border-white/10 rounded-2xl shadow-lg p-6 min-h-[600px] flex flex-col">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-grow">
           {/* Tabs Header */}
-          <TabsList className="mx-auto w-fit h-14 mb-6 bg-gray-900/60 backdrop-blur-sm rounded-xl px-4 flex gap-1 border border-gray-200">
+          <TabsList className="mx-auto w-fit h-14 mb-6 bg-gray-700/40 backdrop-blur-sm rounded-xl px-4 flex gap-1 border border-gray-200">
             {[
               { id: "topGainers", label: "Top Gainers" },
               { id: "trending", label: "Trending" },

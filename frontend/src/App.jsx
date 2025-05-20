@@ -19,6 +19,8 @@ import MarketSection from "./components/MarketSection";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
 import { useEffect } from "react";
+import CoinDetail from "./components/CoinDetail";
+
 
 // ─────────────────────────────
 // 🔐 ProtectedRoute Component
@@ -73,6 +75,17 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                
+                <Route
+                  path="/coin/:coinId"
+                  element={
+                    <ProtectedRoute>
+                      <CoinDetail />
+                    </ProtectedRoute>
+                  }
+                />
+
+
 
                 {/* Features Page */}
                 <Route

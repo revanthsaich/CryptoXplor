@@ -24,6 +24,7 @@
     "class-variance-authority": "^0.7.1",
     "clerk": "^0.8.3",
     "clsx": "^2.1.1",
+    "lightweight-charts": "^5.0.7",
     "lucide-react": "^0.511.0",
     "radix-ui": "^1.4.1",
     "react": "^19.1.0",

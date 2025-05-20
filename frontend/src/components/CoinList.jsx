@@ -7,10 +7,17 @@ import {
   TableRow,
 } from "./ui/table";
 import { Sparklines, SparklinesLine } from "react-sparklines";
-import React from "react"
+import React from "react";
+import { useNavigate } from "react-router-dom";
 
 function CoinList({ coins }) {
+  const navigate = useNavigate();
+
   if (!coins || coins.length === 0) return <p>No data</p>;
+
+  const handleRowClick = (coinId) => {
+    navigate(`/coin/${coinId}?timeline=7d`);
+  };
 
   return (
     <div className="w-full h-full table-auto overflow-x-auto rounded-lg border">
@@ -30,7 +37,11 @@ function CoinList({ coins }) {
         </TableHeader>
         <TableBody>
           {coins.map((coin, index) => (
-            <TableRow key={coin.id}>
+            <TableRow
+              key={coin.id}
+              className="cursor-pointer hover:bg-muted transition"
+              onClick={() => handleRowClick(coin.id)}
+            >
               <TableCell>{index + 1}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
