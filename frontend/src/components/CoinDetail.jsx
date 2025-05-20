@@ -1,20 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState,useMemo, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import ChartDisplay from "./ChartDisplay";
 import { ChartContainer } from "./ui/chart";
+import {
+  GlobeIcon,
+} from "lucide-react";
 
 const supportedCurrencies = [
   "usd", "inr", "aed", "eur", "btc", "eth", "bnb", "xrp", "jpy", "gbp", "cny", "cad",
   "aud", "zar", "rub", "try", "brl", "mxn", "sgd", "myr", "php", "vnd", "thb", "idr"
 ];
-
-function formatTime(timestamp) {
-  return new Date(timestamp).toLocaleString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-}
 
 function CoinDetail() {
   const { coinId } = useParams();
@@ -22,37 +17,87 @@ function CoinDetail() {
   const [coin, setCoin] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedCurrency, setSelectedCurrency] = useState("usd");
+  const [selectedRange, setSelectedRange] = useState("1d");
+
+  const timeRanges = {
+    "1d": { label: "1 Day", days: 1 },
+    "7d": { label: "7 Days", days: 7 },
+    "4w": { label: "4 Weeks", days: 28 },
+    "30d": { label: "30 Days", days: 30 }
+  };
 
   useEffect(() => {
     const fetchCoin = async () => {
       try {
+        // Fetch basic coin info
         const res = await fetch(
           `https://api.coingecko.com/api/v3/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false`
         );
         const data = await res.json();
 
+        // Fetch market chart data
         const chartRes = await fetch(
-          `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${selectedCurrency}&days=1`
+          `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${selectedCurrency}&days=${timeRanges[selectedRange].days}`
         );
         const chartJson = await chartRes.json();
 
-        const chartData = (chartJson.prices || []).map((p, i, arr) => {
-          const timestamp = Math.floor(p[0] / 1000);
-          const price = p[1];
-          const open = i === 0 ? price : arr[i - 1][1];
-          const close = price;
-          const high = Math.max(open, close) + Math.random(); // simulate
-          const low = Math.min(open, close) - Math.random();  // simulate
-        
-          return {
-            time: timestamp,
-            open,
-            high,
-            low,
-            close,
-          };
-        });
-        
+        // Process price data into candlestick format
+        const prices = chartJson.prices || [];
+        const chartData = [];
+
+        // Determine interval based on selected range
+        const intervals = {
+          "1d": 60 * 60,    // 1 hour
+          "7d": 2 * 60 * 60, // 2 hours
+          "4w": 6 * 60 * 60, // 6 hours
+          "30d": 24 * 60 * 60 // 24 hours (daily)
+        };
+        const interval = intervals[selectedRange] || 60 * 60;
+
+        // Group data by interval for candlesticks
+        let currentInterval = null;
+        let intervalData = null;
+
+        for (let i = 0; i < prices.length; i++) {
+          const timestamp = Math.floor(prices[i][0] / 1000);
+          const price = prices[i][1];
+          const intervalTimestamp = Math.floor(timestamp / interval) * interval;
+
+          if (intervalTimestamp !== currentInterval) {
+            if (intervalData) {
+              chartData.push({
+                time: intervalData.openTime,
+                open: intervalData.open,
+                high: intervalData.high,
+                low: intervalData.low,
+                close: intervalData.close
+              });
+            }
+            currentInterval = intervalTimestamp;
+            intervalData = {
+              openTime: timestamp,
+              open: price,
+              high: price,
+              low: price,
+              close: price
+            };
+          } else {
+            intervalData.high = Math.max(intervalData.high, price);
+            intervalData.low = Math.min(intervalData.low, price);
+            intervalData.close = price;
+          }
+        }
+
+        // Add last interval's data
+        if (intervalData) {
+          chartData.push({
+            time: intervalData.openTime,
+            open: intervalData.open,
+            high: intervalData.high,
+            low: intervalData.low,
+            close: intervalData.close
+          });
+        }
 
         setCoin({ ...data, chart: chartData });
       } catch (error) {
@@ -63,7 +108,7 @@ function CoinDetail() {
     };
 
     fetchCoin();
-  }, [coinId, selectedCurrency]);
+  }, [coinId, selectedCurrency, selectedRange]);
 
   if (loading) return <div className="p-4 text-center">Loading...</div>;
   if (!coin) return <div className="p-4 text-center">Coin not found</div>;
@@ -88,56 +133,90 @@ function CoinDetail() {
         <select
           value={selectedCurrency}
           onChange={(e) => setSelectedCurrency(e.target.value)}
-          className="border p-2 rounded"
+          className="bg-primary/10 dark:bg-primary/20 border-primary/50 dark:border-primary/30 p-2 rounded-lg text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary/70 transition-colors duration-200"
         >
           {supportedCurrencies.map((currency) => (
-            <option key={currency} value={currency}>
+            <option key={currency} value={currency} className="bg-white dark:bg-slate-900">
               {currency.toUpperCase()}
             </option>
           ))}
         </select>
+
       </div>
 
-      <div className="rounded-2xl border bg-white dark:bg-black p-5 shadow-sm w-full">
+      <div className="rounded-2xl border-primary/50 dark:border-primary/30 bg-white dark:bg-slate-900 p-5 shadow-sm w-full">
         <div className="flex flex-col md:flex-row items-start justify-between gap-4">
           <div>
             <p className="text-muted-foreground text-sm mb-1">Current Price</p>
-            <h2 className="text-3xl font-bold text-blue-500">
+            <h2 className="text-3xl font-bold text-primary">
               {price?.toLocaleString()} {selectedCurrency.toUpperCase()}
             </h2>
           </div>
           <div className="flex flex-wrap gap-6 text-sm md:text-base">
-            <div>
-              <p className="text-muted-foreground mb-1">24h High</p>
+            <div className="space-y-1">
+              <p className="text-muted-foreground">24h High</p>
               <p className="text-green-500">
                 {high?.toLocaleString()} {selectedCurrency.toUpperCase()}
               </p>
             </div>
-            <div>
-              <p className="text-muted-foreground mb-1">24h Low</p>
+            <div className="space-y-1">
+              <p className="text-muted-foreground">24h Low</p>
               <p className="text-red-500">
                 {low?.toLocaleString()} {selectedCurrency.toUpperCase()}
               </p>
             </div>
-            <div>
-              <p className="text-muted-foreground mb-1">Market Cap</p>
-              <p>{marketCap?.toLocaleString()} {selectedCurrency.toUpperCase()}</p>
+            <div className="space-y-1">
+              <p className="text-muted-foreground">Market Cap</p>
+              <p className="text-muted-foreground/90">
+                {marketCap?.toLocaleString()} {selectedCurrency.toUpperCase()}
+              </p>
             </div>
-            <div>
-              <p className="text-muted-foreground mb-1">Total Volume</p>
-              <p>{totalVolume?.toLocaleString()} {selectedCurrency.toUpperCase()}</p>
+            <div className="space-y-1">
+              <p className="text-muted-foreground">Total Volume</p>
+              <p className="text-muted-foreground/90">
+                {totalVolume?.toLocaleString()} {selectedCurrency.toUpperCase()}
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="flex justify-center items-center my-6">
-        <ChartContainer
-          className="w-[75vw] h-[50vh] p-4"
-        >
-          <ChartDisplay data={coin.chart} />
-        </ChartContainer>
+      {/* Website Link Section */}
+      {coin?.links?.homepage?.[0] && (
+        <div className="rounded-2xl border-primary/50 dark:border-primary/30 bg-white dark:bg-slate-900 p-5 shadow-sm w-full">
+          <a
+            href={coin.links.homepage[0]}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center w-40 gap-2 p-2 rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors duration-200 group"
+          >
+            <GlobeIcon className="w-5 h-5 text-primary group-hover:text-primary/80" />
+            <span className="text-sm text-muted-foreground group-hover:text-primary">Visit Website</span>
+          </a>
+        </div>
+      )}
 
+      <div className="flex justify-center items-center my-6 flex-col gap-4">
+        <div className="flex gap-2">
+          {Object.entries(timeRanges).map(([key, range]) => (
+            <button
+              key={key}
+              onClick={() => setSelectedRange(key)}
+              className={`px-4 py-2 rounded-lg ${
+                selectedRange === key
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-500 text-white hover:bg-gray-300"
+              }`}
+            >
+              {range.label}
+            </button>
+          ))}
+        </div>
+        <ChartContainer
+          className="w-[80vw] h-[50vh] p-4"
+        >
+          <ChartDisplay data={coin.chart} selectedRange={selectedRange} />
+        </ChartContainer>
       </div>
 
 
