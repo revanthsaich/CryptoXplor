@@ -17,10 +17,11 @@ import { Dashboard } from "./components/Dashboard";
 import TrendingSection from "./components/TrendingSection";
 import MarketSection from "./components/MarketSection";
 import { Provider } from "react-redux";
-import { store } from "./redux/store";
+import { PersistGate } from 'redux-persist/integration/react';
+import { store, persistor } from "./redux/store";
 import { useEffect } from "react";
 import CoinDetail from "./components/CoinDetail";
-
+import TrendingSidebar from "./components/TrendingSidebar";
 
 // ─────────────────────────────
 // 🔐 ProtectedRoute Component
@@ -47,76 +48,77 @@ const ProtectedRoute = ({ children }) => {
 function App() {
   return (
     <Provider store={store}>
-      <ThemeProvider defaultTheme="system" storageKey="codeflow-theme">
-        <Router>
-          <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
-            <Navbar />
-            <main className="flex-1 w-full">
-              <Routes>
-                {/* Home */}
-                <Route
-                  path="/"
-                  element={
-                    <div className="w-full min-h-[calc(100vh-4rem)]">
-                      <Hero />
-                      <Features />
-                      <TrendingSection />
-                      <MarketSection />
-                    </div>
-                  }
-                />
-
-                {/* Dashboard (Protected) */}
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                
-                <Route
-                  path="/coin/:coinId"
-                  element={
-                    <ProtectedRoute>
-                      <CoinDetail />
-                    </ProtectedRoute>
-                  }
-                />
-
-
-
-                {/* Features Page */}
-                <Route
-                  path="/features"
-                  element={
-                    <div className="w-full min-h-[calc(100vh-4rem)]">
-                      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-                        <h1 className="text-2xl font-bold">Features</h1>
+      <PersistGate loading={null} persistor={persistor}>
+        <ThemeProvider defaultTheme="system" storageKey="codeflow-theme">
+          <Router>
+            <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
+              <Navbar />
+              <main className="flex-1 w-full">
+                <Routes>
+                  {/* Home */}
+                  <Route
+                    path="/"
+                    element={
+                      <div className="w-full min-h-[calc(100vh-4rem)]">
+                        <Hero />
+                        <Features />
+                        <TrendingSection />
+                        <MarketSection />
                       </div>
-                    </div>
-                  }
-                />
+                    }
+                  />
 
-                {/* Docs Page */}
-                <Route
-                  path="/docs"
-                  element={
-                    <div className="w-full min-h-[calc(100vh-4rem)] mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-                      <Documentation />
-                    </div>
-                  }
-                />
+                  {/* Dashboard (Protected) */}
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  
+                  <Route
+                    path="/coin/:coinId"
+                    element={
+                      <ProtectedRoute>
+                        <div className="flex h-screen">
+                          <TrendingSidebar />
+                          <div className="flex-1 p-4">
+                            <CoinDetail />
+                          </div>
+                        </div>
+                      </ProtectedRoute>
+                    }
+                  />
 
-                {/* Catch-all */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </main>
-            <Toaster position="top-right" />
-          </div>
-        </Router>
-      </ThemeProvider>
+                  {/* Features Page */}
+                  <Route
+                    path="/features"
+                    element={
+                      <div className="w-full min-h-[calc(100vh-4rem)]">
+                        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+                          <h1 className="text-2xl font-bold">Features</h1>
+                        </div>
+                      </div>
+                    }
+                  />
+
+                  {/* Docs Page */}
+                  <Route
+                    path="/documentation"
+                    element={<Documentation />}
+                  />
+
+                  {/* Catch-all */}
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </main>
+              <Toaster position="top-right" />
+            </div>
+          </Router>
+        </ThemeProvider>
+      </PersistGate>
     </Provider>
   );
 }

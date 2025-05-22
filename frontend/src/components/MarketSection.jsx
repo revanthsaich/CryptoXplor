@@ -3,6 +3,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCoins } from "../utils/coinGeckoSlice";
 import CoinList from "./CoinList";
+import Loader from './Loader';
 
 function MarketSection() {
   const [activeTab, setActiveTab] = useState("topGainers");
@@ -59,7 +60,10 @@ function MarketSection() {
                 }`}
             >
               {loading && activeTab === tab ? (
-                <p className="text-center text-gray-300">Loading...</p>
+                <div className="flex flex-col items-center justify-center">
+                  <Loader size="md" className="mb-2" />
+                  <p className="text-center text-gray-300">Loading...</p>
+                </div>
               ) : error ? (
                 <p className="text-center text-red-400">Error: {error}</p>
               ) : (

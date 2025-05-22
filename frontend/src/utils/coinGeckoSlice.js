@@ -4,9 +4,25 @@ const API_BASE = "https://api.coingecko.com/api/v3/coins/markets";
 const VS_CURRENCY = "usd";
 
 // Async thunk to fetch coins by type
+import { getCachedData, setCachedData } from '../utils/cache';
+import { canMakeCall, recordCall } from '../utils/rateLimiter';
+
 export const fetchCoins = createAsyncThunk(
   "coinGecko/fetchCoins",
   async (type) => {
+    // Check cache first
+    const cacheKey = `coins_${type}`;
+    const cachedData = getCachedData(cacheKey);
+    
+    if (cachedData) {
+      return { type, data: cachedData };
+    }
+
+    // Check rate limit
+    if (!canMakeCall()) {
+      throw new Error("Rate limit exceeded. Please wait a minute before making another request.");
+    }
+
     let url = "";
 
     if (type === "topGainers") {
@@ -17,10 +33,26 @@ export const fetchCoins = createAsyncThunk(
       url = `${API_BASE}?vs_currency=${VS_CURRENCY}&order=market_cap_asc&per_page=8&page=1&sparkline=true&price_change_percentage=1h,24h,7d`;
     }
 
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Failed to fetch coins");
-    const data = await response.json();
-    return { type, data };
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Failed to fetch coins");
+      const data = await response.json();
+      
+      // Cache the data
+      setCachedData(cacheKey, data);
+      
+      // Record the API call
+      recordCall();
+      
+      return { type, data };
+    } catch (error) {
+      // If there's an error, try to return cached data if available
+      const fallbackData = getCachedData(cacheKey);
+      if (fallbackData) {
+        return { type, data: fallbackData };
+      }
+      throw error;
+    }
   }
 );
 

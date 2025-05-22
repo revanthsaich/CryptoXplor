@@ -5,6 +5,7 @@ import { ChartContainer } from "./ui/chart";
 import {
   GlobeIcon,
 } from "lucide-react";
+import Loader from './Loader';
 
 const supportedCurrencies = [
   "usd", "inr", "aed", "eur", "btc", "eth", "bnb", "xrp", "jpy", "gbp", "cny", "cad",
@@ -110,7 +111,12 @@ function CoinDetail() {
     fetchCoin();
   }, [coinId, selectedCurrency, selectedRange]);
 
-  if (loading) return <div className="p-4 text-center">Loading...</div>;
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <Loader size="lg" className="mb-2" />
+      <p className="text-center">Loading...</p>
+    </div>
+  );
   if (!coin) return <div className="p-4 text-center">Coin not found</div>;
 
   const { name, symbol, image, market_data, description } = coin;
@@ -122,25 +128,27 @@ function CoinDetail() {
   const totalVolume = market_data?.total_volume?.[selectedCurrency];
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <img src={image?.small} alt={name} className="w-10 h-10" />
-          <h1 className="text-2xl font-semibold">
+    <div className="p-4 space-y-4 w-full h-[100vh] mt-[2rem] overflow-y-auto">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <img src={image?.small} alt={name} className="w-8 h-8 rounded-full" />
+          <h2 className="text-lg font-semibold">
             {name} ({symbol?.toUpperCase()})
-          </h1>
+          </h2>
         </div>
-        <select
-          value={selectedCurrency}
-          onChange={(e) => setSelectedCurrency(e.target.value)}
-          className="bg-primary/10 dark:bg-primary/20 border-primary/50 dark:border-primary/30 p-2 rounded-lg text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary/70 transition-colors duration-200"
-        >
-          {supportedCurrencies.map((currency) => (
-            <option key={currency} value={currency} className="bg-white dark:bg-slate-900">
-              {currency.toUpperCase()}
-            </option>
-          ))}
-        </select>
+        <div className="flex items-center gap-2">
+          <select
+            value={selectedCurrency}
+            onChange={(e) => setSelectedCurrency(e.target.value)}
+            className="bg-primary/10 dark:bg-primary/20 border-primary/50 dark:border-primary/30 px-2 py-1 rounded-lg text-xs focus:ring-2 focus:ring-primary/50 focus:border-primary/70 transition-colors duration-200"
+          >
+            {supportedCurrencies.map((currency) => (
+              <option key={currency} value={currency} className="bg-white dark:bg-slate-900">
+                {currency.toUpperCase()}
+              </option>
+            ))}
+          </select>
+        </div>
 
       </div>
 
