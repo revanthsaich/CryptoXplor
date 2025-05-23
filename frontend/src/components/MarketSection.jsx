@@ -10,7 +10,13 @@ function MarketSection() {
 
   const dispatch = useDispatch();
   const { topGainers, trending, newCoins, loading, error } = useSelector(
-    (state) => state.coinGecko
+    (state) => state.coinGecko,
+    (prev, next) => {
+      // Only re-render if the actual data changes
+      return prev.topGainers === next.topGainers &&
+             prev.trending === next.trending &&
+             prev.newCoins === next.newCoins;
+    }
   );
 
   const dataMap = {
@@ -19,18 +25,21 @@ function MarketSection() {
     newCoins,
   };
 
-  useEffect(() => {
-    if (!dataMap[activeTab]) {
-      dispatch(fetchCoins(activeTab));
-    }
-  }, [activeTab, dataMap, dispatch]);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     if (!dataMap[activeTab] && !loading) {
+  //       dispatch(fetchCoins(activeTab));
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, [activeTab, dataMap, dispatch]);
 
   return (
-    <div className="w-full h-auto max-w-8xl mx-auto px-4 py-10">
-      <div className="bg-white/2 backdrop-blur-md border border-white/10 rounded-2xl shadow-lg p-6 min-h-[600px] flex flex-col">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-grow">
-          {/* Tabs Header */}
-          <TabsList className="mx-auto w-fit h-14 mb-6 bg-gray-700/40 backdrop-blur-sm rounded-xl px-4 flex gap-1 border border-gray-200">
+    <div className="w-full h-auto max-w-7xl mx-auto px-4 py-8 md:px-6 lg:px-8">
+      <div className="w-auto rounded-2xl p-5 md:p-6 flex flex-col">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex w-auto flex-col">
+          <TabsList className="w-full h-auto mb-6 rounded-xl px-4 flex flex-col md:flex-row gap-1 backdrop-blur-sm">
             {[
               { id: "topGainers", label: "Top Gainers" },
               { id: "trending", label: "Trending" },
@@ -39,10 +48,10 @@ function MarketSection() {
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
-                className={`text-sm h-10 font-medium px-5 rounded-lg transition-colors duration-300
+                className={`text-sm h-12 md:h-10 font-medium px-4 sm:px-5 rounded-lg transition-all duration-300 w-full md:w-auto
         ${activeTab === tab.id
-                    ? "bg-gray-700 text-white shadow-lg"
-                    : "bg-transparent text-white hover:text-white"
+                    ? "bg-gray-700 text-white shadow-lg ring-1 ring-gray-700/50"
+                    : "bg-gray-800/50 backdrop-blur-sm border border-gray-700/20 text-gray hover:text-white"
                   }`}
               >
                 {tab.label}
@@ -50,33 +59,34 @@ function MarketSection() {
             ))}
           </TabsList>
 
-
-          {/* Tabs Content */}
-          {["topGainers", "trending", "newCoins"].map((tab) => (
+          {[
+            "topGainers", "trending", "newCoins"].map((tab) => (
             <TabsContent
               key={tab}
               value={tab}
-              className={`flex-grow transition-opacity duration-300 ${activeTab === tab ? "block" : "hidden"
+              className={`w-full flex-grow transition-opacity duration-300 ${activeTab === tab ? "block" : "hidden"
                 }`}
             >
-              {loading && activeTab === tab ? (
-                <div className="flex flex-col items-center justify-center">
-                  <Loader size="md" className="mb-2" />
-                  <p className="text-center text-gray-300">Loading...</p>
-                </div>
-              ) : error ? (
-                <p className="text-center text-red-400">Error: {error}</p>
-              ) : (
-                <div className="w-full">
-                  <CoinList coins={dataMap[tab]} />
-                </div>
-              )}
+              <div className="w-full flex-grow">
+                {loading && activeTab === tab ? (
+                  <div className="flex flex-col items-center justify-center">
+                    <Loader size="md" className="mb-2" />
+                    <p className="text-center text-gray-300">Loading...</p>
+                  </div>
+                ) : error ? (
+                  <p className="text-center text-red-400">Error: {error}</p>
+                ) : (
+                  <div className="w-full">
+                    <CoinList coins={dataMap[tab]} />
+                  </div>
+                )}
+              </div>
             </TabsContent>
           ))}
         </Tabs>
       </div>
     </div>
   );
-}
+};
 
 export default MarketSection;

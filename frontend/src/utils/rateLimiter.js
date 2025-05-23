@@ -1,7 +1,7 @@
 const MAX_CALLS = 10;
 const TIME_WINDOW = 60 * 1000; // 1 minute
 
-const calls = [];
+let calls = [];
 
 export const canMakeCall = () => {
   const now = Date.now();
