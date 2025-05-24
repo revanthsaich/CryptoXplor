@@ -25,15 +25,15 @@ function MarketSection() {
     newCoins,
   };
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     if (!dataMap[activeTab] && !loading) {
-  //       dispatch(fetchCoins(activeTab));
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!dataMap[activeTab] && !loading) {
+        dispatch(fetchCoins(activeTab));
+      }
+    };
 
-  //   fetchData();
-  // }, [activeTab, dataMap, dispatch]);
+    fetchData();
+  }, [activeTab, dataMap, dispatch]);
 
   return (
     <div className="w-full h-auto max-w-7xl mx-auto px-4 py-8 md:px-6 lg:px-8">

@@ -14,6 +14,8 @@ const OrderForm = ({ coinId, price, symbol, selectedCurrency }) => {
       setLoading(true);
       const order = {
         coinId,
+        symbol,
+        selectedCurrency,
         type: 'buy',
         quantity,
         price,
@@ -29,37 +31,6 @@ const OrderForm = ({ coinId, price, symbol, selectedCurrency }) => {
       setLoading(false);
     }
   };
-
-  const handleSell = async () => {
-    try {
-      setLoading(true);
-      const response = await api.post('/orders', {
-        coinId,
-        type: 'sell',
-        quantity,
-        price,
-        userId: window.Clerk.user?.id
-      });
-
-      const order = response.data;
-      if (onPlaceOrder) {
-        onPlaceOrder({
-          ...order,
-          type: 'sell',
-          quantity,
-          price,
-          userId: window.Clerk.user?.id
-        });
-      }
-      showSuccessToast('Order placed successfully!');
-    } catch (error) {
-      console.error('Error placing sell order:', error);
-      showErrorToast('Error placing sell order');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="rounded-2xl border-primary/50 dark:border-primary/30 bg-white dark:bg-slate-900 p-5 shadow-sm w-full">
       <div className="flex flex-col gap-4">
@@ -97,14 +68,7 @@ const OrderForm = ({ coinId, price, symbol, selectedCurrency }) => {
           >
             <PlusCircleIcon className="w-5 h-5" />
             Buy
-          </button>
-          <button
-            onClick={handleSell}
-            className="flex-1 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors duration-200 flex items-center justify-center gap-2"
-          >
-            <MinusCircleIcon className="w-5 h-5" />
-            Sell
-          </button>
+          </button> 
         </div>
       </div>
     </div>

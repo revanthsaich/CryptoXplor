@@ -1,71 +1,45 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import api from './api';
 
-const API_BASE = "https://api.coingecko.com/api/v3/coins/markets";
 const VS_CURRENCY = "usd";
-
-// Async thunk to fetch coins by type
-import { getCachedData, setCachedData } from '../utils/cache';
-import { canMakeCall, recordCall } from '../utils/rateLimiter';
+const PER_PAGE = 8;
 
 export const fetchCoins = createAsyncThunk(
   "coinGecko/fetchCoins",
-  async (type) => {
-    // Check cache first
-    const cacheKey = `coins_${type}`;
-    const cachedData = getCachedData(cacheKey);
-    
-    if (cachedData) {
-      return { type, data: cachedData };
-    }
-
-    // Check rate limit
-    if (!canMakeCall()) {
-      throw new Error("Rate limit exceeded. Please wait a minute before making another request.");
-    }
-
-    let url = "";
-
-    if (type === "topGainers") {
-      url = `${API_BASE}?vs_currency=${VS_CURRENCY}&order=price_change_percentage_24h_desc&per_page=8&page=1&sparkline=true&price_change_percentage=1h,24h,7d`;
-    } else if (type === "trending") {
-      url = `${API_BASE}?vs_currency=${VS_CURRENCY}&order=market_cap_desc&per_page=8&page=1&sparkline=true&price_change_percentage=1h,24h,7d`;
-    } else if (type === "newCoins") {
-      url = `${API_BASE}?vs_currency=${VS_CURRENCY}&order=market_cap_asc&per_page=8&page=1&sparkline=true&price_change_percentage=1h,24h,7d`;
-    }
-
+  async (type, { rejectWithValue }) => {
     try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Failed to fetch coins");
-      const data = await response.json();
+      const response = await api.get(`/market/coins/${type}`, {
+        params: {
+          vs_currency: VS_CURRENCY,
+          per_page: PER_PAGE,
+          page: 1
+        }
+      });
       
-      // Cache the data
-      setCachedData(cacheKey, data);
-      
-      // Record the API call
-      recordCall();
-      
-      return { type, data };
+      return { type, data: response.data };
     } catch (error) {
-      // If there's an error, try to return cached data if available
-      const fallbackData = getCachedData(cacheKey);
-      if (fallbackData) {
-        return { type, data: fallbackData };
-      }
-      throw error;
+      console.error(`Error fetching ${type} coins:`, error);
+      return rejectWithValue(error.response?.data?.error || 'Failed to fetch coins');
     }
   }
 );
 
+const initialState = {
+  topGainers: null,
+  trending: null,
+  newCoins: null,
+  loading: false,
+  error: null,
+};
+
 const coinGeckoSlice = createSlice({
   name: "coinGecko",
-  initialState: {
-    topGainers: null,
-    trending: null,
-    newCoins: null,
-    loading: false,
-    error: null,
+  initialState,
+  reducers: {
+    clearError: (state) => {
+      state.error = null;
+    },
   },
-  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchCoins.pending, (state) => {
@@ -78,9 +52,11 @@ const coinGeckoSlice = createSlice({
       })
       .addCase(fetchCoins.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.payload || action.error.message;
       });
   },
 });
+
+export const { clearError } = coinGeckoSlice.actions;
 
 export default coinGeckoSlice.reducer;

@@ -42,34 +42,40 @@ export default function TrendingSection() {
   const navigate = useNavigate()
   const [data, setData] = useState({})
 
-  // useEffect(() => {
-  //   async function fetchData() {
-  //     const result = {}
-  //     await Promise.all(
-  //       coins.map(async (coin) => {
-  //         try {
-  //           const res = await fetch(
-  //             `https://api.coingecko.com/api/v3/coins/${coin.id}/market_chart?vs_currency=usd&days=7`
-  //           )
-  //           const json = await res.json()
-  //           const formatted = json.prices.map((item) => {
-  //             const date = new Date(item[0])
-  //             return {
-  //               day: date.toLocaleDateString("en-US", { weekday: "short" }),
-  //               price: parseFloat(item[1].toFixed(2)),
-  //             }
-  //           })
-  //           result[coin.id] = formatted
-  //         } catch (err) {
-  //           console.error(`Failed to fetch ${coin.id} data`, err)
-  //         }
-  //       })
-  //     )
-  //     setData(result)
-  //   }
+  useEffect(() => {
+    async function fetchData() {
+      const result = {}
+      try {
+        await Promise.all(
+          coins.map(async (coin) => {
+            try {
+              const response = await fetch(
+                `http://localhost:5000/market/market-chart/${coin.id}?vs_currency=usd&days=7`
+              )
+              if (!response.ok) {
+                throw new Error(`Failed to fetch ${coin.id} data`)
+              }
+              const json = await response.json()
+              // Format the data for the chart
+              result[coin.id] = json.prices.map(item => ({
+                day: new Date(item[0]).toLocaleDateString("en-US", { weekday: "short" }),
+                price: parseFloat(item[1].toFixed(2))
+              }))
+            } catch (err) {
+              console.error(`Failed to fetch ${coin.id} data:`, err)
+              // Set empty array as fallback
+              result[coin.id] = []
+            }
+          })
+        )
+        setData(result)
+      } catch (error) {
+        console.error('Error fetching market data:', error)
+      }
+    }
 
-  //   fetchData()
-  // }, [])
+    fetchData()
+  }, [])
 
   return (
     <section className="py-24 sm:py-32 bg-background text-foreground" id="trending">

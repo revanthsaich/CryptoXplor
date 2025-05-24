@@ -9,6 +9,14 @@ const orderSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    symbol: {
+        type: String,
+        required: true
+    },
+    selectedCurrency: {
+        type: String,
+        required: true
+    },
     type: {
         type: String,
         enum: ['buy', 'sell'],
@@ -32,7 +40,19 @@ const orderSchema = new mongoose.Schema({
     status: {
         type: String,
         enum: ['pending', 'completed', 'cancelled'],
-        default: 'completed'
+        default: 'pending'
+    },
+    sellPrice: {
+        type: Number,
+        min: 0
+    },
+    pnl: {
+        type: Number,
+        default: 0
+    },
+    pnlPercentage: {
+        type: Number,
+        default: 0
     },
     createdAt: {
         type: Date,

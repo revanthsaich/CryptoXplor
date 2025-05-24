@@ -1,9 +1,33 @@
-import React from 'react';
-import { ClockIcon, CheckCircle2Icon, AlertCircleIcon } from 'lucide-react';
+import React, { useState } from 'react';
+import { CheckCircle2Icon, AlertCircleIcon } from 'lucide-react';
 import { useOrders } from '../contexts/OrderContext';
+import { Button } from './ui/button';
 
 const OrderHistory = ({ price, selectedCurrency, symbol }) => {
-  const { orders, loading } = useOrders();
+  const { 
+    orders: allOrders, 
+    loading, 
+    sellOrder: contextSellOrder,
+  } = useOrders();
+  const [sellingOrderId, setSellingOrderId] = useState(null);
+  
+  // Sort orders by creation date (newest first)
+  const orders = [...allOrders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  const handleSell = async (order) => {
+    try {
+      setSellingOrderId(order._id);
+      await contextSellOrder(
+        order._id, 
+        order.quantity, 
+        order.price, 
+        order.coinId, 
+        order.selectedCurrency || selectedCurrency
+      );
+    } finally {
+      setSellingOrderId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -19,51 +43,77 @@ const OrderHistory = ({ price, selectedCurrency, symbol }) => {
       <div className="space-y-4">
         {orders.map((order) => {
           const isBuy = order.type === 'buy';
-          const currentPrice = price;
-          const pnl = isBuy 
-            ? ((currentPrice - order.price) * order.quantity).toFixed(2)
-            : ((order.price - currentPrice) * order.quantity).toFixed(2);
-          
           const statusIcon = order.status === 'completed' ? (
-            <CheckCircle2Icon className="w-4 h-4 text-green-500" />
+            <CheckCircle2Icon key="completed-icon" className="w-4 h-4 text-green-500" />
           ) : (
-            <AlertCircleIcon className="w-4 h-4 text-yellow-500" />
+            <AlertCircleIcon key="pending-icon" className="w-4 h-4 text-yellow-500" />
           );
           
           return (
             <div key={order._id} className="p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">
-                    {isBuy ? ' Bought ' : ' Sold '} {order.quantity} {symbol?.toUpperCase()}
-                  </p>
+              <div className="flex flex-col sm:flex-row justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <p className={`text-lg font-semibold ${isBuy ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                      {isBuy ? 'Bought' : 'Sold'} {order.quantity} {order.symbol?.toUpperCase() || symbol?.toUpperCase()}
+                    </p>
+                    <span className="px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                      {order.selectedCurrency?.toUpperCase() || selectedCurrency?.toUpperCase() || 'USD'}
+                    </span>
+                  </div>
                   <div className="flex items-center gap-2">
                     {statusIcon}
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
                       {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                     </p>
                   </div>
-                  <p className="text-xs text-gray-400 dark:text-gray-500">
-                    {new Date(order.createdAt).toLocaleString()}
-                  </p>
+                  <div className="text-xs space-y-0.5">
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Created: {new Date(order.createdAt).toLocaleString()}
+                    </p>
+                    {order.completedAt && order.status === 'completed' && (
+                      <p className="text-gray-500 dark:text-gray-400">
+                        Completed: {new Date(order.completedAt).toLocaleString()}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <p className={`font-medium ${isBuy ? 'text-green-500' : 'text-red-500'} text-right`}
-                    title={`Total Cost: ${order.totalCost.toLocaleString()}`}
-                  >
-                    {order.price.toLocaleString()}
-                  </p>
-                  <div className={`flex items-center gap-2 ${pnl > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    <ClockIcon className="w-4 h-4" />
-                    <p>{pnl > 0 ? '+' : ''}{pnl}{selectedCurrency.toUpperCase()}</p>
+                <div className="flex flex-col items-end space-y-1">
+                  <div className="text-right">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Price</p>
+                    <p className={`text-lg font-semibold ${isBuy ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                      {parseFloat(order.price).toLocaleString(undefined, { 
+                        style: 'currency',
+                        currency: order.selectedCurrency || selectedCurrency || 'USD',
+                        minimumFractionDigits: 2, 
+                        maximumFractionDigits: 8 
+                      })}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Total</p>
+                    <p className="font-medium text-gray-900 dark:text-gray-100">
+                      {parseFloat(Math.abs(order.totalCost)).toLocaleString(undefined, { 
+                        style: 'currency',
+                        currency: order.selectedCurrency || selectedCurrency || 'USD',
+                        minimumFractionDigits: 2, 
+                        maximumFractionDigits: 2 
+                      })}
+                    </p>
+                    {order.status === 'pending' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2 text-xs"
+                        onClick={() => handleSell(order)}
+                        disabled={sellingOrderId === order._id}
+                      >
+                        {sellingOrderId === order._id ? 'Selling...' : 'Sell'}
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
-              {order.holdings > 0 && (
-                <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                  Holdings: {order.holdings} {symbol?.toUpperCase()}
-                </div>
-              )}
             </div>
           );
         })}

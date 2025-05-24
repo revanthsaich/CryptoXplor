@@ -6,6 +6,8 @@ const mongoose = require('mongoose');
 dotenv.config();
 const { clerkMiddleware } = require('@clerk/express');
 const orderRoutes = require('./routes/orders');
+const coinRoutes = require('./routes/coins');
+const marketRoutes = require('./routes/market');
 
 
 app.use(cors({
@@ -18,6 +20,8 @@ app.use(cors({
 app.use(express.json());
 app.use(clerkMiddleware());
 app.use('/orders', orderRoutes);
+app.use('/coins', coinRoutes);
+app.use('/market', marketRoutes);
 
 
 const PORT = process.env.PORT || 5000;

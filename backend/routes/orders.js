@@ -47,7 +47,7 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { userId } = getAuth(req);
-    const { coinId, type, quantity, price } = req.body;
+    const { coinId, type, quantity, price, symbol, selectedCurrency } = req.body;
 
     if (!coinId || !type || !quantity || !price) {
       return res.status(400).json({ error: 'Missing required fields' });
@@ -56,6 +56,8 @@ router.post('/', async (req, res) => {
     const order = new Order({
       userId,
       coinId,
+      symbol,
+      selectedCurrency,
       type,
       quantity,
       price,
@@ -89,29 +91,34 @@ router.get('/:orderId', async (req, res) => {
   }
 });
 
-router.patch('/:orderId/cancel', async (req, res) => {
+
+
+// Sell an order
+router.put('/:id/sell', async (req, res) => {
   try {
     const { userId } = getAuth(req);
-    const order = await Order.findOneAndUpdate(
-      {
-        _id: req.params.orderId,
-        userId,
-        status: 'pending'
-      },
-      { status: 'cancelled' },
-      { new: true }
-    ).exec();
+    const { sellPrice, pnl, pnlPercentage } = req.body;
 
+    // Find the order
+    const order = await Order.findOne({ _id: req.params.id, userId });
     if (!order) {
-      return res.status(404).json({ error: 'Order not found or cannot be cancelled' });
+      return res.status(404).json({ error: 'Order not found' });
     }
+
+    // Update order with sell information
+    order.status = 'completed';
+    order.completedAt = new Date();
+    order.sellPrice = sellPrice;
+    order.pnl = pnl;
+    order.pnlPercentage = pnlPercentage;
+
+    await order.save();
 
     res.json(order);
   } catch (error) {
-    console.error('Error cancelling order:', error);
-    res.status(500).json({ error: 'Failed to cancel order' });
+    console.error('Error selling order:', error);
+    res.status(500).json({ error: 'Failed to sell order' });
   }
 });
-
 
 module.exports = router;

@@ -1,0 +1,5 @@
+{"timestamp":1748088178726,"data":{"id":"bitcoin","symbol":"btc","name":"Bitcoin","image": {
+    "thumb": "https://coin-images.coingecko.com/coins/images/1/thumb/bitcoin.png?1696501400",
+    "small": "https://coin-images.coingecko.com/coins/images/1/small/bitcoin.png?1696501400",
+    "large": "https://coin-images.coingecko.com/coins/images/1/large/bitcoin.png?1696501400"
+  },"market_data":{"current_price":{"usd":109291},"price_change_percentage_24h":-0.20777,"market_cap":{"usd":2171554672464},"total_volume":{"usd":47481068907}}}}

@@ -11,6 +11,7 @@ import { useAuth } from '@clerk/clerk-react';
 import Loader from './Loader';
 import data from './test/bitcoindata.json';
 import chartJson from './test/bitcoinchart.json';
+import { useOrders } from '../contexts/OrderContext';
 
 const supportedCurrencies = [
   "usd", "inr", "aed", "eur", "btc", "eth", "bnb", "xrp", "jpy", "gbp", "cny", "cad",
@@ -24,7 +25,12 @@ function CoinDetail() {
   const [selectedCurrency, setSelectedCurrency] = useState("usd");
   const [selectedRange, setSelectedRange] = useState("1d");
   const { userId, isLoaded } = useAuth();
-  const [localOrders, setLocalOrders] = useState([]);
+  const { orders: allOrders } = useOrders();
+  
+  // Filter orders for the current coin only
+  const coinOrders = useMemo(() => {
+    return allOrders.filter(order => order.coinId === coinId);
+  }, [allOrders, coinId]);
 
   if (!isLoaded) return <div>Loading...</div>;
   if (!userId) return <div>Please log in to view this page</div>;
@@ -39,17 +45,20 @@ function CoinDetail() {
   useEffect(() => {
     const fetchCoin = async () => {
       try {
-        // Fetch basic coin info
-        // const res = await fetch(
-        //   `https://api.coingecko.com/api/v3/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false`
-        // );
-        // const data = await res.json();
+        // Fetch basic coin info from backend
+        const res = await fetch(
+          `http://localhost:5000/coins/${coinId}?currency=${selectedCurrency}`
+        );
+        if (!res.ok) throw new Error('Failed to fetch coin data');
+        const data = await res.json();
+        console.log(data);
 
-        // // Fetch market chart data
-        // const chartRes = await fetch(
-        //   `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${selectedCurrency}&days=${timeRanges[selectedRange].days}`
-        // );
-        // const chartJson = await chartRes.json();
+        // Fetch market chart data from backend
+        const chartRes = await fetch(
+          `http://localhost:5000/coins/${coinId}/market-chart?vs_currency=${selectedCurrency}&days=${timeRanges[selectedRange].days}`
+        );
+        if (!chartRes.ok) throw new Error('Failed to fetch chart data');
+        const chartJson = await chartRes.json();
 
         // Process price data into candlestick format
         const prices = chartJson.prices || [];
@@ -254,19 +263,18 @@ function CoinDetail() {
         symbol={symbol}
         selectedCurrency={selectedCurrency}
         userId={userId}
-        onPlaceOrder={(order) => {
-          setLocalOrders((prev) => [...prev, order]);
-          alert('Order placed successfully!');
-        }}
       />
 
-      <OrderHistory
-        orders={localOrders}
-        price={price}
-        selectedCurrency={selectedCurrency}
-        symbol={symbol}
-        userId={userId}
-      />
+      <div className="mt-8">
+        <h2 className="text-xl font-medium mb-4">Order History for {name}</h2>
+        <OrderHistory
+          price={price}
+          selectedCurrency={selectedCurrency}
+          symbol={symbol}
+          userId={userId}
+          orders={coinOrders}
+        />
+      </div>
     </div>
   );
 }

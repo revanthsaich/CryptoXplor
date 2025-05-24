@@ -3,7 +3,7 @@ import { useUser } from "@clerk/clerk-react";
 import { FaMapMarkerAlt, FaWallet } from "react-icons/fa";
 import { useOrders } from "../contexts/OrderContext";
 import Loader from "./Loader";
-import { ClockIcon, CheckCircle2Icon, AlertCircleIcon } from 'lucide-react';
+import { CheckCircle2Icon, AlertCircleIcon } from 'lucide-react';
 
 export function Dashboard() {
   const [loading, setLoading] = useState(false);
@@ -12,8 +12,10 @@ export function Dashboard() {
   const { orders: allOrders, loading: ordersLoading, addOrder } = useOrders();
   const { user: clerkUser } = useUser();
   
-  // Show only 4 orders by default, or all if showAllOrders is true
-  const orderHistory = showAllOrders ? allOrders : allOrders.slice(0, 4);
+  // Sort orders by creation date (newest first) and limit to 4 if not showing all
+  const orderHistory = [...allOrders]
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, showAllOrders ? allOrders.length : 4);
   
   // Load region
   useEffect(() => {
@@ -81,7 +83,7 @@ export function Dashboard() {
             {allOrders.length > 4 && (
               <button 
                 onClick={() => setShowAllOrders(!showAllOrders)}
-                className="text-sm font-medium text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
+                className="text-sm font-medium bg-gray-600 hover:bg-gray-700 text-white dark:bg-gray-400 dark:hover:bg-gray-300 transition-colors"
               >
                 {showAllOrders ? 'Show Less' : `View All (${allOrders.length})`}
               </button>
@@ -90,71 +92,69 @@ export function Dashboard() {
           <div className="space-y-4">
             {orderHistory.map((order) => {
               const isBuy = order.type === 'buy';
-              const currentPrice = order.price;
-              const pnl = isBuy 
-                ? ((currentPrice - order.price) * order.quantity).toFixed(2)
-                : ((order.price - currentPrice) * order.quantity).toFixed(2);
-              
               const statusIcon = order.status === 'completed' ? (
-                <CheckCircle2Icon className="w-4 h-4 text-green-500" />
+                <CheckCircle2Icon className="w-4 h-4 text-green-500" key="completed-icon" />
               ) : (
-                <AlertCircleIcon className="w-4 h-4 text-yellow-500" />
+                <AlertCircleIcon className="w-4 h-4 text-yellow-500" key="pending-icon" />
               );
               
               return (
                 <div key={order._id} className="p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-                <div className="space-y-3">
-                  <div className="flex flex-col sm:flex-row justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <p className={`text-lg font-semibold ${order.type === 'buy' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                          {order.type === 'buy' ? 'Bought' : 'Sold'} {order.quantity}
-                        </p>
-                        <span className="px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                          {order.coinId.charAt(0).toUpperCase() + order.coinId.slice(1)}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {statusIcon}
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                        </p>
-                      </div>
-                      <div className="text-xs space-y-0.5">
-                        <p className="text-gray-500 dark:text-gray-400">
-                          Created: {new Date(order.createdAt).toLocaleString()}
-                        </p>
-                        {order.completedAt && (
-                          <p className="text-gray-500 dark:text-gray-400">
-                            Completed: {new Date(order.completedAt).toLocaleString()}
+                  <div className="space-y-3">
+                    <div className="flex flex-col sm:flex-row justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <p className={`text-lg font-semibold ${order.type === 'buy' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                            {order.type === 'buy' ? 'Bought' : 'Sold'} {order.quantity} {order.symbol?.toUpperCase() || order.coinId.toUpperCase()}
                           </p>
-                        )}
+                          <span className="px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                            {order.selectedCurrency?.toUpperCase() || 'USD'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {statusIcon}
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                          </p>
+                        </div>
+                        <div className="text-xs space-y-0.5">
+                          <p className="text-gray-500 dark:text-gray-400">
+                            Created: {new Date(order.createdAt).toLocaleString()}
+                          </p>
+                          {order.completedAt && (
+                            <p className="text-gray-500 dark:text-gray-400">
+                              Completed: {new Date(order.completedAt).toLocaleString()}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex flex-col items-end space-y-1">
-                      <div className="text-right">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Price</p>
-                        <p className={`text-lg font-semibold ${isBuy ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                          {parseFloat(order.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 8 })}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Total</p>
-                        <p className="font-medium text-gray-900 dark:text-gray-100">
-                          {parseFloat(order.totalCost).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </p>
-                      </div>
-                      <div className={`flex items-center gap-1 text-sm ${pnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                        <span>{pnl >= 0 ? '↑' : '↓'}</span>
-                        <span>{pnl >= 0 ? '+' : ''}{pnl} USD</span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
-                          ({(pnl / order.totalCost * 100).toFixed(2)}%)
-                        </span>
+                      <div className="flex flex-col items-end space-y-1">
+                        <div className="text-right">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Price</p>
+                          <p className={`text-lg font-semibold ${isBuy ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                            {parseFloat(order.price).toLocaleString(undefined, { 
+                              style: 'currency',
+                              currency: order.selectedCurrency || 'USD',
+                              minimumFractionDigits: 2, 
+                              maximumFractionDigits: 8 
+                            })}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Total</p>
+                          <p className="font-medium text-gray-900 dark:text-gray-100">
+                            {parseFloat(Math.abs(order.totalCost)).toLocaleString(undefined, { 
+                              style: 'currency',
+                              currency: order.selectedCurrency || 'USD',
+                              minimumFractionDigits: 2, 
+                              maximumFractionDigits: 2 
+                            })}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
               );
             })}
           </div>

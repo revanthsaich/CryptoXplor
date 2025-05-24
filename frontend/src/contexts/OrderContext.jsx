@@ -9,7 +9,7 @@ export const OrderProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const { getToken } = useAuth();
   const api = axios.create({
-    baseURL: 'http://localhost:5000/',
+    baseURL: 'http://localhost:5000',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -44,6 +44,90 @@ export const OrderProvider = ({ children }) => {
     fetchOrders();
   }, []);
 
+  const [isSelling, setIsSelling] = useState(false);
+
+  const sellOrder = async (orderId, quantity, buyPrice, coinId, currency) => {
+    try {
+      setIsSelling(true);
+      const token = await getToken();
+      if (!token) {
+        throw new Error('No authentication token available');
+      }
+
+      console.log('Fetching current price for:', coinId, 'in', currency);
+      
+      // Get current price for P&L calculation
+      const response = await api.get(`/coins/${coinId}`, {
+        params: { currency },
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      console.log('Price API response:', response.data);
+      
+      if (!response.data?.market_data?.current_price?.[currency.toLowerCase()]) {
+        throw new Error('Invalid price data received from API');
+      }
+      
+      const currentPrice = response.data.market_data.current_price[currency.toLowerCase()];
+      
+      // Calculate P&L
+      const pnl = (currentPrice - buyPrice) * quantity;
+      const pnlPercentage = ((currentPrice - buyPrice) / buyPrice) * 100;
+      
+      console.log('Calculated P&L:', { currentPrice, buyPrice, quantity, pnl, pnlPercentage });
+
+      // Update order status to completed and add P&L
+      console.log('Updating order with sell data...');
+      const updateResponse = await api.put(
+        `/orders/${orderId}/sell`,
+        { 
+          sellPrice: currentPrice,
+          pnl,
+          pnlPercentage,
+          completedAt: new Date().toISOString()
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      console.log('Order update response:', updateResponse.data);
+
+      // Update local state
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          order._id === orderId
+            ? {
+                ...order,
+                status: 'completed',
+                completedAt: new Date().toISOString(),
+                sellPrice: currentPrice,
+                pnl,
+                pnlPercentage
+              }
+            : order
+        )
+      );
+
+      return updateResponse.data;
+    } catch (error) {
+      console.error('Error in sellOrder:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        stack: error.stack
+      });
+      throw error;
+    } finally {
+      setIsSelling(false);
+    }
+  };
+
   const addOrder = async (order) => {
     try {
       const token = await getToken();
@@ -71,7 +155,14 @@ export const OrderProvider = ({ children }) => {
   };
 
   return (
-    <OrderContext.Provider value={{ orders, loading, addOrder }}>
+    <OrderContext.Provider value={{ 
+      orders, 
+      loading, 
+      addOrder, 
+      fetchOrders, 
+      sellOrder,
+      isSelling 
+    }}>
       {children}
     </OrderContext.Provider>
   );
