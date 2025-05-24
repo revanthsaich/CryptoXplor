@@ -1,26 +1,30 @@
 import React, { useState } from 'react';
 import api from '../utils/api';
 import { PlusCircleIcon, MinusCircleIcon } from 'lucide-react';
+import { showSuccessToast, showErrorToast } from '../utils/toast';
+import { useOrders } from '../contexts/OrderContext';
 
 const OrderForm = ({ coinId, price, symbol, selectedCurrency }) => {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
+  const { addOrder } = useOrders();
 
   const handleBuy = async () => {
     try {
       setLoading(true);
-      const response = await api.post('/orders', {
+      const order = {
         coinId,
         type: 'buy',
         quantity,
-        price
-      });
+        price,
+        userId: window.Clerk.user?.id
+      };
 
-      const order = response.data;
-      alert('Order placed successfully!');
+      await addOrder(order);
+      showSuccessToast('Order placed successfully!');
     } catch (error) {
       console.error('Error placing buy order:', error);
-      alert('Error placing buy order');
+      showErrorToast('Error placing buy order');
     } finally {
       setLoading(false);
     }
@@ -33,14 +37,24 @@ const OrderForm = ({ coinId, price, symbol, selectedCurrency }) => {
         coinId,
         type: 'sell',
         quantity,
-        price
+        price,
+        userId: window.Clerk.user?.id
       });
 
       const order = response.data;
-      alert('Order placed successfully!');
+      if (onPlaceOrder) {
+        onPlaceOrder({
+          ...order,
+          type: 'sell',
+          quantity,
+          price,
+          userId: window.Clerk.user?.id
+        });
+      }
+      showSuccessToast('Order placed successfully!');
     } catch (error) {
       console.error('Error placing sell order:', error);
-      alert('Error placing sell order');
+      showErrorToast('Error placing sell order');
     } finally {
       setLoading(false);
     }

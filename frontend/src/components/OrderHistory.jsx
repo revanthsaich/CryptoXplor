@@ -1,26 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { ClockIcon } from 'lucide-react';
-import api from '../utils/api';
-const OrderHistory = ({ price, selectedCurrency, symbol }) => {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+import React from 'react';
+import { ClockIcon, CheckCircle2Icon, AlertCircleIcon } from 'lucide-react';
+import { useOrders } from '../contexts/OrderContext';
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const response = await api.get('/orders');
-        console.log('Fetched orders:', response.data);
-        setOrders(response.data); // Directly use response.data
-      } catch (error) {
-        console.error('Error fetching orders:', error.message || error);
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    fetchOrders();
-  }, []);
-  
+const OrderHistory = ({ price, selectedCurrency, symbol }) => {
+  const { orders, loading } = useOrders();
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-5">
@@ -40,6 +24,12 @@ const OrderHistory = ({ price, selectedCurrency, symbol }) => {
             ? ((currentPrice - order.price) * order.quantity).toFixed(2)
             : ((order.price - currentPrice) * order.quantity).toFixed(2);
           
+          const statusIcon = order.status === 'completed' ? (
+            <CheckCircle2Icon className="w-4 h-4 text-green-500" />
+          ) : (
+            <AlertCircleIcon className="w-4 h-4 text-yellow-500" />
+          );
+          
           return (
             <div key={order._id} className="p-4 rounded-lg border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
@@ -47,12 +37,20 @@ const OrderHistory = ({ price, selectedCurrency, symbol }) => {
                   <p className="font-medium">
                     {isBuy ? ' Bought ' : ' Sold '} {order.quantity} {symbol?.toUpperCase()}
                   </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center gap-2">
+                    {statusIcon}
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                    </p>
+                  </div>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">
                     {new Date(order.createdAt).toLocaleString()}
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <p className={`font-medium ${isBuy ? 'text-green-500' : 'text-red-500'}`}>
+                  <p className={`font-medium ${isBuy ? 'text-green-500' : 'text-red-500'} text-right`}
+                    title={`Total Cost: ${order.totalCost.toLocaleString()}`}
+                  >
                     {order.price.toLocaleString()}
                   </p>
                   <div className={`flex items-center gap-2 ${pnl > 0 ? 'text-green-500' : 'text-red-500'}`}>
@@ -61,6 +59,11 @@ const OrderHistory = ({ price, selectedCurrency, symbol }) => {
                   </div>
                 </div>
               </div>
+              {order.holdings > 0 && (
+                <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                  Holdings: {order.holdings} {symbol?.toUpperCase()}
+                </div>
+              )}
             </div>
           );
         })}

@@ -19,13 +19,12 @@ const supportedCurrencies = [
 
 function CoinDetail() {
   const { coinId } = useParams();
-  const [searchParams] = useSearchParams();
   const [coin, setCoin] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedCurrency, setSelectedCurrency] = useState("usd");
   const [selectedRange, setSelectedRange] = useState("1d");
   const { userId, isLoaded } = useAuth();
-  const [orders, setOrders] = useState([]);
+  const [localOrders, setLocalOrders] = useState([]);
 
   if (!isLoaded) return <div>Loading...</div>;
   if (!userId) return <div>Please log in to view this page</div>;
@@ -256,16 +255,17 @@ function CoinDetail() {
         selectedCurrency={selectedCurrency}
         userId={userId}
         onPlaceOrder={(order) => {
-          setOrders([...orders, order]);
+          setLocalOrders((prev) => [...prev, order]);
           alert('Order placed successfully!');
         }}
       />
 
       <OrderHistory
-        orders={orders}
+        orders={localOrders}
         price={price}
         selectedCurrency={selectedCurrency}
         symbol={symbol}
+        userId={userId}
       />
     </div>
   );
