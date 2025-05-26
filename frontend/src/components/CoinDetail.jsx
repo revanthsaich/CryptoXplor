@@ -158,7 +158,8 @@ function CoinDetail() {
           <select
             value={selectedCurrency}
             onChange={(e) => setSelectedCurrency(e.target.value)}
-            className="bg-primary/10 dark:bg-primary/20 border-primary/50 dark:border-primary/30 px-2 py-1 rounded-lg text-xs focus:ring-2 focus:ring-primary/50 focus:border-primary/70 transition-colors duration-200"
+            className="bg-primary/10 dark:bg-primary/20 border-primary/50 dark:border-primary/30 px-2 py-1 rounded-lg text-xs focus:ring-2 focus:ring-primary/50 focus:border-primary/70 transition-colors duration-200
+                     [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gray-400/50 [&::-webkit-scrollbar-thumb]:rounded-full"
           >
             {supportedCurrencies.map((currency) => (
               <option key={currency} value={currency} className="bg-white dark:bg-slate-900">

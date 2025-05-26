@@ -6,7 +6,7 @@ import CoinList from "./CoinList";
 import Loader from './Loader';
 
 function MarketSection() {
-  const [activeTab, setActiveTab] = useState("topGainers");
+  const [activeTab, setActiveTab] = useState("trending");
 
   const dispatch = useDispatch();
   const { topGainers, trending, newCoins, loading, error } = useSelector(
@@ -39,10 +39,10 @@ function MarketSection() {
     <div className="w-full h-auto max-w-7xl mx-auto px-4 py-8 md:px-6 lg:px-8">
       <div className="w-auto rounded-2xl p-5 md:p-6 flex flex-col">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex w-auto flex-col">
-          <TabsList className="w-full h-auto mb-6 rounded-xl px-4 flex flex-col md:flex-row gap-1 backdrop-blur-sm">
+          <TabsList className="w-full h-auto mb-6 rounded-xl text-white px-4 flex flex-col md:flex-row gap-1 backdrop-blur-sm">
             {[
-              { id: "topGainers", label: "Top Gainers" },
               { id: "trending", label: "Trending" },
+              { id: "topGainers", label: "Top Gainers" },
               { id: "newCoins", label: "New Coins" },
             ].map((tab) => (
               <TabsTrigger
@@ -50,8 +50,8 @@ function MarketSection() {
                 value={tab.id}
                 className={`text-sm h-12 md:h-10 font-medium px-4 sm:px-5 rounded-lg transition-all duration-300 w-full md:w-auto
         ${activeTab === tab.id
-                    ? "bg-gray-700 text-white shadow-lg ring-1 ring-gray-700/50"
-                    : "bg-gray-800/50 backdrop-blur-sm border border-gray-700/20 text-gray hover:text-white"
+                    ? "bg-gray-700  shadow-lg ring-1 ring-gray-700/50"
+                    : "bg-gray-800/50 backdrop-blur-sm border border-gray-100/20 text-gray hover:text-white"
                   }`}
               >
                 {tab.label}
@@ -60,7 +60,7 @@ function MarketSection() {
           </TabsList>
 
           {[
-            "topGainers", "trending", "newCoins"].map((tab) => (
+            "trending", "topGainers", "newCoins"].map((tab) => (
             <TabsContent
               key={tab}
               value={tab}

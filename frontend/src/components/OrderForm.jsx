@@ -61,10 +61,10 @@ const OrderForm = ({ coinId, price, symbol, selectedCurrency }) => {
             />
           </div>
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-4 w-[10rem]">
           <button
             onClick={handleBuy}
-            className="flex-1 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors duration-200 flex items-center justify-center gap-2"
+            className="flex-1 w-[10rem] bg-green-500 text-white px-3 py-1.5 text-sm rounded-lg hover:bg-green-600 transition-colors duration-200 flex items-center justify-center gap-1.5"
           >
             <PlusCircleIcon className="w-5 h-5" />
             Buy

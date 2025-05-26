@@ -4,6 +4,7 @@ import { useOrders } from '../contexts/OrderContext';
 import { Button } from './ui/button';
 
 const OrderHistory = ({ price, selectedCurrency, symbol }) => {
+  const [visibleOrders, setVisibleOrders] = useState(4); // Show 4 orders by default
   const { 
     orders: allOrders, 
     loading, 
@@ -41,7 +42,7 @@ const OrderHistory = ({ price, selectedCurrency, symbol }) => {
     <div className="rounded-2xl border-primary/50 dark:border-primary/30 bg-white dark:bg-slate-900 p-5 shadow-sm w-full">
       <h2 className="text-xl font-medium mb-4">Order History</h2>
       <div className="space-y-4">
-        {orders.map((order) => {
+        {orders.slice(0, visibleOrders).map((order) => {
           const isBuy = order.type === 'buy';
           const statusIcon = order.status === 'completed' ? (
             <CheckCircle2Icon key="completed-icon" className="w-4 h-4 text-green-500" />
@@ -104,7 +105,7 @@ const OrderHistory = ({ price, selectedCurrency, symbol }) => {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="mt-2 text-xs"
+                        className="mt-2 text-xs bg-red-500 text-white"
                         onClick={() => handleSell(order)}
                         disabled={sellingOrderId === order._id}
                       >
@@ -118,6 +119,16 @@ const OrderHistory = ({ price, selectedCurrency, symbol }) => {
           );
         })}
       </div>
+      {orders.length > 4 && (
+        <div className="mt-4 text-center">
+          <button
+            onClick={() => setVisibleOrders(prev => prev === 4 ? orders.length : 4)}
+            className="text-sm text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+          >
+            {visibleOrders === 4 ? 'Show All Orders' : 'Show Less'}
+          </button>
+        </div>
+      )}
     </div>
   );
 };
