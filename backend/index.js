@@ -9,9 +9,9 @@ const orderRoutes = require('./routes/orders');
 const coinRoutes = require('./routes/coins');
 const marketRoutes = require('./routes/market');
 
-
+//added this to allow CORS requests from the frontend domain
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: ['http://localhost:5173','https://crypto-xplor.vercel.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Clerk-Session-Id'],
   credentials: true,
