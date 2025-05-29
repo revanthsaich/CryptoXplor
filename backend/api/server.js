@@ -3,7 +3,7 @@ const cors = require('cors');
 const app = express();
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
-// dotenv.config();
+dotenv.config();
 const { clerkMiddleware } = require('@clerk/express');
 const orderRoutes = require('../routes/orders');
 const coinRoutes = require('../routes/coins');
@@ -32,3 +32,4 @@ mongoose.connect(process.env.MONGODB_URI)
     // app.listen(5000, () => console.log(`Server running on port ${PORT}`));
   })
   .catch(err => console.error(err));
+module.exports = app;
