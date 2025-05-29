@@ -9,7 +9,7 @@ export const OrderProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const { getToken } = useAuth();
   const api = axios.create({
-    baseURL: 'http://localhost:5000',
+    baseURL: 'https://crypto-xplor.vercel.app/',
     headers: {
       'Content-Type': 'application/json',
     },

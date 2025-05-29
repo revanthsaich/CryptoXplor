@@ -50,7 +50,7 @@ export default function TrendingSection() {
           coins.map(async (coin) => {
             try {
               const response = await fetch(
-                `http://localhost:5000/market/market-chart/${coin.id}?vs_currency=usd&days=7`
+                `https://crypto-xplor.vercel.app/market/market-chart/${coin.id}?vs_currency=usd&days=7`
               )
               if (!response.ok) {
                 throw new Error(`Failed to fetch ${coin.id} data`)

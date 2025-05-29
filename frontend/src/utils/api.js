@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/';
+const API_URL = 'https://crypto-xplor.vercel.app/';
 
 // Create a simple API instance without authentication
 const api = axios.create({

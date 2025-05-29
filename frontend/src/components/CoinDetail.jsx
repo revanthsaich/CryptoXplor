@@ -47,7 +47,7 @@ function CoinDetail() {
       try {
         // Fetch basic coin info from backend
         const res = await fetch(
-          `http://localhost:5000/coins/${coinId}?currency=${selectedCurrency}`
+          `https://crypto-xplor.vercel.app/coins/${coinId}?currency=${selectedCurrency}`
         );
         if (!res.ok) throw new Error('Failed to fetch coin data');
         const data = await res.json();
@@ -55,7 +55,7 @@ function CoinDetail() {
 
         // Fetch market chart data from backend
         const chartRes = await fetch(
-          `http://localhost:5000/coins/${coinId}/market-chart?vs_currency=${selectedCurrency}&days=${timeRanges[selectedRange].days}`
+          `https://crypto-xplor.vercel.app/coins/${coinId}/market-chart?vs_currency=${selectedCurrency}&days=${timeRanges[selectedRange].days}`
         );
         if (!chartRes.ok) throw new Error('Failed to fetch chart data');
         const chartJson = await chartRes.json();
