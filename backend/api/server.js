@@ -5,9 +5,9 @@ const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 // dotenv.config();
 const { clerkMiddleware } = require('@clerk/express');
-const orderRoutes = require('./routes/orders');
-const coinRoutes = require('./routes/coins');
-const marketRoutes = require('./routes/market');
+const orderRoutes = require('../routes/orders');
+const coinRoutes = require('../routes/coins');
+const marketRoutes = require('../routes/market');
 
 
 app.use(cors({
