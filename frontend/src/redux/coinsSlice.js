@@ -12,7 +12,7 @@ export const fetchCoins = createAsyncThunk(
   'coins/fetchCoins',
   async (page, { rejectWithValue }) => {
     try {
-      const response = await fetch(`http://crypto-xplor.vercel.app/market/list-all/?page=${page}`);
+      const response = await fetch(`https://crypto-xplor.vercel.app/market/list-all/?page=${page}`);
       // const response = await fetch(`http://localhost:5000/market/list-all/?page=${page}`);
       if (!response.ok) {
         throw new Error('Failed to fetch coins');
