@@ -9,9 +9,9 @@ const orderRoutes = require('../routes/orders');
 const coinRoutes = require('../routes/coins');
 const marketRoutes = require('../routes/market');
 
-
+app.use(cors());
 app.use(cors({
-  origin: ['http://localhost:5173',,'https://cryptoxplor.netlify.app'],
+  origin: ['http://localhost:5173','https://cryptoxplor.netlify.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Clerk-Session-Id'],
   credentials: true,
