@@ -23,6 +23,7 @@ import {
   import { useEffect } from "react";
   import CoinDetail from "./components/CoinDetail";
   import TrendingSidebar from "./components/TrendingSidebar";
+  import CoinPage from "./components/CoinPage";
   // ─────────────────────────────
   // 🔐 ProtectedRoute Component
   // ─────────────────────────────
@@ -75,6 +76,15 @@ import {
                         element={
                           <ProtectedRoute>
                             <Dashboard />
+                          </ProtectedRoute>
+                        }
+                      />
+
+                      <Route
+                        path="/search"
+                        element={
+                          <ProtectedRoute>
+                            <CoinPage />
                           </ProtectedRoute>
                         }
                       />

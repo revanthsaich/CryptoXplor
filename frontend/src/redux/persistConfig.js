@@ -1,10 +1,10 @@
-import { persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 
-const persistConfig = {
-  key: 'root',
+const createPersistConfig = (key) => ({
+  key,
   storage,
-  whitelist: ['coinGecko'], // Only persist the coinGecko slice
-};
+  version: 1,
+  // Add any default options here
+});
 
-export default persistConfig;
+export default createPersistConfig;

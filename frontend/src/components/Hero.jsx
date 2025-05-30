@@ -21,7 +21,7 @@ export function Hero() {
               size="lg"
               className="gap-2 bg-primary text-primary-foreground hover:bg-muted transition active:translate-y-0.5 active:shadow-inner active:scale-[0.98] transform duration-75"
             >
-              <Link to="/dashboard" className="font-bold flex items-center gap-2">
+              <Link to="/search" className="font-bold flex items-center gap-2">
                 Explore
                 <ArrowRight className="h-4 w-4" />
               </Link>
