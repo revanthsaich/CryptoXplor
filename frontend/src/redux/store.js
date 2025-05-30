@@ -2,7 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import coinGeckoReducer from "../utils/coinGeckoSlice";
-import coinsReducer from "../features/coins/coinsSlice";
+import coinsReducer from "../redux/coinsSlice";
 import createPersistConfig from "./persistConfig";
 
 // Persist configuration for coinGecko
