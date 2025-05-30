@@ -8,7 +8,7 @@ import Loader from './Loader';
 const CoinPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { coins, loading, hasMore } = useSelector((state) => state.coins);
+  const { coins, loading, hasMore, page } = useSelector((state) => state.coins);
 
   useEffect(() => {
     // Initial load
@@ -19,7 +19,7 @@ const CoinPage = () => {
 
   const handleShowMore = () => {
     if (!loading && hasMore) {
-      dispatch(fetchCoins(1)); // The page is managed in the Redux slice
+      dispatch(fetchCoins(page));
     }
   };
 
