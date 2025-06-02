@@ -14,20 +14,23 @@ export function Documentation() {
         {/* Title */}
         <div className="text-center space-y-4">
           <h1 className="text-4xl font-bold tracking-tight font-serif">
-            CryptoXplor – A MERN-Based Crypto Portfolio Dashboard
+            CryptoXplor – A MERN-Based Crypto Portfolio Dashboard with Wallet & Clerk Authentication
           </h1>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto font-sans">
-            Track, simulate, and explore your crypto assets with MetaMask & Clerk integration
+            Explore real-time crypto data, track wallet balances, and simulate token conversions—all secured by Clerk and MetaMask.
           </p>
         </div>
 
         {/* Abstract */}
         <div className="prose prose-gray dark:prose-invert max-w-none font-sans">
           <p className="text-lg">
-            <strong>CryptoXplor</strong> is a modern cryptocurrency portfolio dashboard developed using the MERN stack (MongoDB, Express.js, React.js, Node.js). It bridges the gap between Web2 and Web3 by integrating traditional login systems (via Clerk) with decentralized wallet connections (via MetaMask). The platform empowers users to explore their crypto holdings, monitor real-time market data, view token history, and simulate coin conversions—all from a unified, user-friendly dashboard.
+            <strong>CryptoXplor</strong> is a full-stack cryptocurrency dashboard built on the MERN stack (MongoDB, Express.js, React.js, Node.js), designed for tracking and simulating digital asset transactions in a user-friendly and responsive interface.
           </p>
           <p className="text-lg">
-            This project is designed for crypto enthusiasts who want a simplified way to track their assets, access live price data, and interact with Web3 wallets in a secure and efficient environment.
+            It features dual authentication—Clerk (email/OAuth) and MetaMask wallet login—offering seamless Web2 and Web3 access. Users can connect their Ethereum wallets, fetch live ETH and ERC-20 token balances, simulate coin conversions using real-time rates via CoinGecko, and log their activity securely in a personal dashboard.
+          </p>
+          <p className="text-lg">
+            With conversion history tracking, interactive charts, and a responsive UI powered by Tailwind, CryptoXplor offers crypto enthusiasts a unified platform to manage, visualize, and explore their portfolio.
           </p>
         </div>
 
@@ -41,8 +44,8 @@ export function Documentation() {
                 <li><strong>Backend:</strong> Node.js, Express.js</li>
                 <li><strong>Database:</strong> MongoDB (Atlas or Local)</li>
                 <li><strong>Authentication:</strong> Clerk (email/password, OAuth), MetaMask via Ethers.js</li>
-                <li><strong>APIs:</strong> CoinGecko API (for live token data and charts)</li>
-                <li><strong>Blockchain:</strong> Ethers.js (wallet balances and token info)</li>
+                <li><strong>APIs:</strong> CoinGecko API (live prices, charts, and conversion rates)</li>
+                <li><strong>Blockchain:</strong> Ethers.js (wallet and token data)</li>
               </ul>
             </CardContent>
           </Card>
@@ -56,7 +59,7 @@ export function Documentation() {
               <CardHeader>
                 <CardTitle className="font-serif text-xl">🔐 Authentication Module</CardTitle>
                 <CardDescription className="font-sans">
-                  Login using Clerk (email, Google, GitHub) or authenticate via MetaMask wallet.
+                  Secure login via Clerk or decentralized wallet login via MetaMask.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -64,7 +67,7 @@ export function Documentation() {
               <CardHeader>
                 <CardTitle className="font-serif text-xl">💼 Wallet Module</CardTitle>
                 <CardDescription className="font-sans">
-                  Connect MetaMask, display ETH and ERC-20 balances, and token metadata.
+                  Connect Ethereum wallets, display wallet address, ETH, and token balances using Ethers.js.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -72,7 +75,7 @@ export function Documentation() {
               <CardHeader>
                 <CardTitle className="font-serif text-xl">📊 Dashboard Module</CardTitle>
                 <CardDescription className="font-sans">
-                  View real-time crypto prices, charts, and interactive graphs using CoinGecko data.
+                  Visualize live crypto prices and historical charts using CoinGecko and Chart.js/Recharts.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -80,7 +83,7 @@ export function Documentation() {
               <CardHeader>
                 <CardTitle className="font-serif text-xl">🔁 Token Conversion Module</CardTitle>
                 <CardDescription className="font-sans">
-                  Simulate conversions like ETH → USDT with live rates and logs.
+                  Simulate real-time token conversions with exchange rates and auto-conversion logging.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -88,7 +91,7 @@ export function Documentation() {
               <CardHeader>
                 <CardTitle className="font-serif text-xl">🕒 History & Logging Module</CardTitle>
                 <CardDescription className="font-sans">
-                  Track simulated conversions and optionally store activity in MongoDB.
+                  View past simulated conversions and wallet interactions, with optional MongoDB storage.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -96,7 +99,7 @@ export function Documentation() {
               <CardHeader>
                 <CardTitle className="font-serif text-xl">🧩 UI/UX Module</CardTitle>
                 <CardDescription className="font-sans">
-                  Clean Tailwind UI, responsive layout, dark/light mode, loading states, and error handling.
+                  Clean, dark/light themed UI with Tailwind, animations, loading states, and error handling.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -109,11 +112,11 @@ export function Documentation() {
           <Card>
             <CardContent className="pt-6">
               <ol className="list-decimal list-inside space-y-2 text-muted-foreground font-sans">
-                <li>User logs in using Clerk or connects their MetaMask wallet.</li>
-                <li>On authentication, they're redirected to the dashboard.</li>
-                <li>Dashboard displays wallet info, live prices, charts, and token data.</li>
-                <li>User can simulate coin conversions using live rates from CoinGecko.</li>
-                <li>Conversion logs are optionally stored and viewable in the History module.</li>
+                <li>User lands on the homepage and chooses to log in using Clerk or connect MetaMask.</li>
+                <li>Upon authentication, they are redirected to the dashboard.</li>
+                <li>The dashboard displays wallet details, token balances, and live charts.</li>
+                <li>User can simulate token conversions, which are processed with real-time data.</li>
+                <li>All interactions are logged under the History tab and optionally saved to MongoDB.</li>
               </ol>
             </CardContent>
           </Card>
@@ -125,11 +128,12 @@ export function Documentation() {
           <Card>
             <CardContent className="pt-6">
               <ul className="list-disc list-inside space-y-2 text-muted-foreground font-sans">
-                <li>Seamlessly combines Web2 (Clerk) and Web3 (MetaMask) authentication</li>
-                <li>Real-time crypto data powered by CoinGecko</li>
-                <li>Simplified portfolio tracking with beautiful Tailwind UI</li>
-                <li>Ideal for learners and enthusiasts experimenting with wallets and tokens</li>
-                <li>Easy deployment on Vercel (frontend) and Render/Heroku (backend)</li>
+                <li>Unified Web2 and Web3 login system for convenience and flexibility</li>
+                <li>Live market data and conversion rates using CoinGecko API</li>
+                <li>Clean and responsive UI built with Tailwind CSS</li>
+                <li>Conversion simulations and historical tracking for learning and analysis</li>
+                <li>Ideal for developers, crypto enthusiasts, and learners entering the blockchain space</li>
+                <li>Easy deployment on platforms like Vercel and Render/Heroku</li>
               </ul>
             </CardContent>
           </Card>

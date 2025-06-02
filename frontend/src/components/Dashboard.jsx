@@ -1,17 +1,88 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/clerk-react";
-import { FaMapMarkerAlt, FaWallet } from "react-icons/fa";
+import { FaMapMarkerAlt, FaWallet, FaEthereum } from "react-icons/fa";
 import { useOrders } from "../contexts/OrderContext";
 import Loader from "./Loader";
 import { CheckCircle2Icon, AlertCircleIcon } from 'lucide-react';
+import { ethers } from "ethers";
 
 export function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [region, setRegion] = useState(null);
   const [showAllOrders, setShowAllOrders] = useState(false);
+  const [walletAddress, setWalletAddress] = useState("");
+  const [ethBalance, setEthBalance] = useState("0");
+  const [isConnecting, setIsConnecting] = useState(false);
   const { orders: allOrders, loading: ordersLoading, addOrder } = useOrders();
   const { user: clerkUser } = useUser();
   
+  // Check if Web3 is available on component mount
+  useEffect(() => {
+    checkIfWalletIsConnected();
+    // Set up event listener for account changes
+    if (window.ethereum) {
+      window.ethereum.on('accountsChanged', handleAccountsChanged);
+      return () => {
+        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+      };
+    }
+  }, []);
+
+  const checkIfWalletIsConnected = async () => {
+    if (window.ethereum) {
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        if (accounts.length > 0) {
+          setWalletAddress(accounts[0]);
+          getAccountBalance(accounts[0]);
+        }
+      } catch (error) {
+        console.error("Error checking wallet connection:", error);
+      }
+    }
+  };
+
+  const handleAccountsChanged = (accounts) => {
+    if (accounts.length === 0) {
+      // MetaMask is locked or the user has not connected any accounts
+      setWalletAddress("");
+      setEthBalance("0");
+    } else {
+      setWalletAddress(accounts[0]);
+      getAccountBalance(accounts[0]);
+    }
+  };
+
+  const connectWallet = async () => {
+    if (!window.ethereum) {
+      alert("Please install MetaMask!");
+      return;
+    }
+
+    try {
+      setIsConnecting(true);
+      const accounts = await window.ethereum.request({ 
+        method: 'eth_requestAccounts' 
+      });
+      setWalletAddress(accounts[0]);
+      getAccountBalance(accounts[0]);
+    } catch (error) {
+      console.error("Error connecting wallet:", error);
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  const getAccountBalance = async (account) => {
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const balance = await provider.getBalance(account);
+      setEthBalance(ethers.formatEther(balance));
+    } catch (error) {
+      console.error("Error fetching balance:", error);
+    }
+  };
+
   // Sort orders by creation date (newest first) and limit to 4 if not showing all
   const orderHistory = [...allOrders]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -25,12 +96,6 @@ export function Dashboard() {
       setLoading(false);
     }, 1000);
   }, []);
-  
-  // Load order history
-  useEffect(() => {
-    // Orders are now managed by OrderContext
-    // No need for manual API call
-  }, [ordersLoading]);
   
   if (loading) {
     return <Loader />;
@@ -46,31 +111,57 @@ export function Dashboard() {
               alt="Profile"
               className="w-full h-full rounded-full object-cover border-4 border-primary-100 dark:border-primary-900"
             />
-            <div className="absolute bottom-0 right-0 bg-green-500 dark:bg-green-400 rounded-full w-6 h-6 border-2 border-white dark:border-gray-800 flex items-center justify-center">
-              <span className="text-xs text-white">✓</span>
-            </div>
+            {walletAddress && (
+              <div className="absolute bottom-0 right-0 bg-green-500 dark:bg-green-400 rounded-full w-6 h-6 border-2 border-white dark:border-gray-800 flex items-center justify-center">
+                <span className="text-xs text-white">✓</span>
+              </div>
+            )}
           </div>
           <div className="text-center">
             <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-gray-900 dark:text-white">
-              {clerkUser?.fullName || "Guest User"}
+              {clerkUser?.emailAddresses?.[0]?.emailAddress || walletAddress || "User"}
             </h2>
             <div className="flex items-center justify-center space-x-2 text-gray-600 dark:text-gray-300">
               <FaMapMarkerAlt className="text-lg" />
               <p>{region || "Loading location..."}</p>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              @{clerkUser?.username || "username"}
-            </p>
-          </div>
-          <div className="w-full bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <FaWallet className="text-xl text-primary-600 dark:text-primary-400" />
-                <span className="text-sm text-gray-600 dark:text-gray-300">Wallet Address</span>
-              </div>
-              <p className="font-medium truncate text-gray-800 dark:text-gray-200">
-                {clerkUser?.walletAddress || "Not connected"}
+            {walletAddress && (
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                {`${walletAddress.substring(0, 6)}...${walletAddress.substring(38)}`}
               </p>
+            )}
+          </div>
+
+          {/* Wallet Balance Card */}
+          <div className="w-full bg-gradient-to-r from-indigo-500 to-blue-600 dark:from-indigo-600 dark:to-blue-700 p-5 rounded-lg text-white">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-3">
+                <FaEthereum className="text-2xl" />
+                <div>
+                  <p className="text-sm font-medium text-indigo-100">Wallet Balance</p>
+                  <p className="text-2xl font-bold">
+                    {parseFloat(ethBalance).toFixed(4)} ETH
+                  </p>
+                  <p className="text-xs text-indigo-100">
+                    {walletAddress ? 
+                      `${walletAddress.substring(0, 6)}...${walletAddress.substring(38)}` : 
+                      "Not connected"}
+                  </p>
+                </div>
+              </div>
+              {!walletAddress ? (
+                <button
+                  onClick={connectWallet}
+                  disabled={isConnecting}
+                  className="px-4 py-2 bg-white text-indigo-600 rounded-lg font-medium hover:bg-indigo-50 transition-colors disabled:opacity-50"
+                >
+                  {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+                </button>
+              ) : (
+                <div className="px-3 py-1 bg-white/20 rounded-full text-xs font-medium">
+                  Connected
+                </div>
+              )}
             </div>
           </div>
         </div>

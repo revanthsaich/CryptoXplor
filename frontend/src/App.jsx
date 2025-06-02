@@ -117,7 +117,7 @@ import {
 
                       {/* Docs Page */}
                       <Route
-                        path="/documentation"
+                        path="/docs"
                         element={<Documentation />}
                       />
 
